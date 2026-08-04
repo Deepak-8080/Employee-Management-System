@@ -1,0 +1,116 @@
+CREATE DATABASE IF NOT EXISTS employee_management;
+USE employee_management;
+
+CREATE TABLE roles (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(40) NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(80) NOT NULL UNIQUE,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    enabled BOOLEAN NOT NULL DEFAULT TRUE,
+    password_reset_token VARCHAR(120),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT NOT NULL,
+    role_id BIGINT NOT NULL,
+    PRIMARY KEY (user_id, role_id),
+    CONSTRAINT fk_user_roles_user FOREIGN KEY (user_id) REFERENCES users(id),
+    CONSTRAINT fk_user_roles_role FOREIGN KEY (role_id) REFERENCES roles(id)
+);
+
+CREATE TABLE refresh_tokens (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expires_at TIMESTAMP NOT NULL,
+    user_id BIGINT NOT NULL UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_refresh_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE departments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL UNIQUE,
+    description VARCHAR(500),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE
+);
+
+CREATE TABLE employees (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    employee_code VARCHAR(40) NOT NULL UNIQUE,
+    first_name VARCHAR(80) NOT NULL,
+    last_name VARCHAR(80) NOT NULL,
+    email VARCHAR(120) NOT NULL UNIQUE,
+    phone VARCHAR(20) NOT NULL,
+    designation VARCHAR(120),
+    date_of_joining DATE NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    address VARCHAR(500),
+    profile_image_path VARCHAR(300),
+    department_id BIGINT NOT NULL,
+    user_id BIGINT UNIQUE,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_employee_department FOREIGN KEY (department_id) REFERENCES departments(id),
+    CONSTRAINT fk_employee_user FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE attendances (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    employee_id BIGINT NOT NULL,
+    attendance_date DATE NOT NULL,
+    check_in TIME,
+    check_out TIME,
+    status VARCHAR(30) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE KEY uk_attendance_employee_date (employee_id, attendance_date),
+    CONSTRAINT fk_attendance_employee FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+CREATE TABLE leave_requests (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    employee_id BIGINT NOT NULL,
+    type VARCHAR(30) NOT NULL,
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason VARCHAR(500) NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    approver_comment VARCHAR(500),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    CONSTRAINT fk_leave_employee FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
+
+CREATE TABLE salaries (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    employee_id BIGINT NOT NULL,
+    salary_month DATE NOT NULL,
+    basic_pay DECIMAL(12,2) NOT NULL,
+    allowances DECIMAL(12,2) NOT NULL,
+    deductions DECIMAL(12,2) NOT NULL,
+    net_pay DECIMAL(12,2) NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    deleted BOOLEAN NOT NULL DEFAULT FALSE,
+    UNIQUE KEY uk_salary_employee_month (employee_id, salary_month),
+    CONSTRAINT fk_salary_employee FOREIGN KEY (employee_id) REFERENCES employees(id)
+);
