@@ -33,5 +33,23 @@ Employee Management System is a Java-based application developed to manage emplo
 3. Update MySQL configuration.
 4. Run the application.
 
+
+Employee-Management-System
+│
+├── src
+│   └── main
+│       └── java
+│           └── (your Java files)
+│
+├── sql
+│   ├── schema.sql
+│   └── data.sql
+│
+├── pom.xml
+├── README.md
+├── .gitignore
+
+
+
 ## Author
 Deepak Sai
